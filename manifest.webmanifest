@@ -1,0 +1,17 @@
+{
+  "name": "MoveBack",
+  "short_name": "MoveBack",
+  "description": "Fitness- und Mobility-App fuer Wiedereinstieg, Routinen und Motivation.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#F2F4F7",
+  "theme_color": "#071A2D",
+  "icons": [
+    {
+      "src": "./assets/moveback-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

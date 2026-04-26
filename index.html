@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>MoveBack</title>
+    <meta
+      name="description"
+      content="MoveBack ist eine moderne Fitness- und Mobility-App fuer Wiedereinstieg, Routinen und Motivation."
+    />
+    <meta name="theme-color" content="#071A2D" />
+    <link rel="icon" href="./assets/moveback-icon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">MoveBack</p>
+          <h1 class="app-title">Fit werden. Beweglich bleiben. Belastbarer leben.</h1>
+        </div>
+        <button class="ghost-button" id="installButton" hidden>Installieren</button>
+      </header>
+
+      <main class="app-content" id="app"></main>
+
+      <nav class="bottom-nav" aria-label="Hauptnavigation">
+        <button class="nav-button nav-button-active" data-tab="dashboard" type="button">
+          <span>Dashboard</span>
+        </button>
+        <button class="nav-button" data-tab="plan" type="button">
+          <span>Woche</span>
+        </button>
+        <button class="nav-button" data-tab="mobility" type="button">
+          <span>Check</span>
+        </button>
+        <button class="nav-button" data-tab="progress" type="button">
+          <span>Fortschritt</span>
+        </button>
+      </nav>
+    </div>
+
+    <div class="modal-backdrop" id="trainingModal" hidden>
+      <section class="modal-panel" aria-modal="true" role="dialog" aria-labelledby="modalTitle">
+        <div class="modal-header">
+          <div>
+            <p class="eyebrow">Training Detail</p>
+            <h2 id="modalTitle">Training</h2>
+          </div>
+          <button class="icon-button" id="closeModalButton" type="button" aria-label="Schliessen">
+            x
+          </button>
+        </div>
+        <div class="modal-body" id="trainingModalContent"></div>
+      </section>
+    </div>
+
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>

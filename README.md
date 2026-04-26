@@ -1,17 +1,41 @@
 # MoveBack
 
-Modernes Expo-MVP fuer eine Fitness- und Mobility-App mit Fokus auf Wiedereinstieg, Routinen und Motivation.
+MoveBack ist jetzt als statische Web-App und kleine PWA fuer GitHub Pages vorbereitet.
 
-## Start
+## Was jetzt direkt funktioniert
 
-Voraussetzung: Node.js `20.19+`
+- Oeffnen per Browser-Link statt App-Installation
+- Lokaler Fortschritt ueber `localStorage`
+- Dashboard, Wochenplan, Training Detail, Mobility Check und Fortschritt
+- Installierbar als Web-App auf kompatiblen Geraeten
 
-1. `npm install`
-2. `npx expo install --fix`
-3. `npm start`
+## GitHub Pages
 
-Hinweise:
+Nach dem Push in GitHub:
 
-- Fuer iPhone-Tests am einfachsten `Expo Go` verwenden.
-- Mit `w` startest du die Web-Vorschau, mit `a` Android und mit `i` iOS auf macOS.
-- Alle Daten liegen lokal in `src/data/mockData.ts`.
+1. `Settings`
+2. `Pages`
+3. `Deploy from a branch`
+4. Branch `main`
+5. Folder `/ (root)`
+
+Danach liegt die App unter:
+
+`https://kevinschu365.github.io/MoveBack/`
+
+## Lokales Testen
+
+Am einfachsten:
+
+1. Den Repo-Ordner in VS Code oder einem lokalen Server oeffnen
+2. `index.html` ueber einen kleinen lokalen Server starten
+
+Oder direkt GitHub Pages verwenden, sobald Pages aktiviert ist.
+
+## Projektstruktur
+
+- `index.html`: App-Shell
+- `styles.css`: komplettes UI-Styling
+- `main.js`: App-Logik, Rendering und lokaler State
+- `data.js`: Dummy-Daten fuer Trainings, Wochenplan und Mobility
+- `manifest.webmanifest` und `sw.js`: PWA-Grundlage
