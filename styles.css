@@ -108,6 +108,50 @@ button {
   gap: 6px;
 }
 
+.week-switcher {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+
+.week-switcher::-webkit-scrollbar {
+  display: none;
+}
+
+.week-chip {
+  flex: 0 0 auto;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.08);
+  color: #dce7f2;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.card .week-chip,
+.stat-card .week-chip,
+.app-content .week-switcher .week-chip {
+  border-color: var(--border);
+  background: var(--surface);
+  color: var(--navy);
+}
+
+.hero-card .week-chip {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.08);
+  color: #dce7f2;
+}
+
+.week-chip-active {
+  background: var(--green);
+  border-color: var(--green);
+  color: var(--navy);
+}
+
 .grow {
   flex: 1;
 }

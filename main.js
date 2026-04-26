@@ -1,13 +1,14 @@
 import {
+  availableWeeks,
   initialCompletedExerciseIdsBySessionId,
   initialMobilityRatings,
   mobilityAreas,
   trainings,
   userProfile,
-  weekPlan,
+  weekPlansByWeek,
 } from "./data.js";
 
-const STORAGE_KEY = "moveback-web-state-v1";
+const STORAGE_KEY = "moveback-web-state-v2";
 
 const appElement = document.querySelector("#app");
 const navButtons = Array.from(document.querySelectorAll(".nav-button"));
@@ -21,6 +22,7 @@ let deferredInstallPrompt = null;
 
 const state = {
   activeTab: "dashboard",
+  activeWeek: 1,
   activeSessionId: null,
   mobilityRatings: { ...initialMobilityRatings },
   completedExerciseIdsBySessionId: JSON.parse(
@@ -57,6 +59,15 @@ function registerEvents() {
 
     if (action === "open-mobility") {
       state.activeTab = "mobility";
+      saveState();
+      renderApp();
+      return;
+    }
+
+    if (action === "set-week") {
+      state.activeWeek = Number(target.dataset.week);
+      closeModal();
+      saveState();
       renderApp();
       return;
     }
@@ -116,8 +127,9 @@ function registerEvents() {
 }
 
 function renderApp() {
-  const completedSessionIds = getCompletedSessionIds();
-  const resolvedWeekPlan = getResolvedWeekPlan(completedSessionIds);
+  const currentWeekPlan = getCurrentWeekPlan();
+  const completedSessionIds = getCompletedSessionIds(currentWeekPlan);
+  const resolvedWeekPlan = getResolvedWeekPlan(currentWeekPlan, completedSessionIds);
   const activeTabMarkup = getActiveTabMarkup(resolvedWeekPlan);
 
   appElement.innerHTML = activeTabMarkup;
@@ -152,7 +164,7 @@ function renderDashboard(resolvedWeekPlan) {
     : 0;
   const streak = getCurrentStreak(resolvedWeekPlan);
   const mobilityScore = getMobilityScore();
-  const completedTrainingCount = getCompletedTrainingCount();
+  const completedTrainingCount = getCompletedTrainingCount(resolvedWeekPlan);
   const openCount = resolvedWeekPlan.filter(
     (day) => day.status === "open" && day.trainingId,
   ).length;
@@ -167,10 +179,11 @@ function renderDashboard(resolvedWeekPlan) {
             <p class="hero-copy">${userProfile.goal}</p>
           </div>
           <div class="streak-badge">
-            <strong>${streak}</strong>
-            <span>Tage Streak</span>
+            <strong>W${state.activeWeek}</strong>
+            <span>Aktive Woche</span>
           </div>
         </div>
+        ${renderWeekSwitcher()}
         <button class="primary-button" data-action="open-session" data-session-id="${today.id}">
           Training starten
         </button>
@@ -240,8 +253,9 @@ function renderPlan(resolvedWeekPlan) {
     <section class="stack-lg">
       <div class="section-heading">
         <h2>Wochenplan</h2>
-        <p>Sieben klare Tage mit Trainingstyp, Dauer und Status.</p>
+        <p>Dein echter 6-Wochen-Plan mit Hund, Wiedereinstieg, Kraft und Klimmzug-Basis.</p>
       </div>
+      ${renderWeekSwitcher()}
       <div class="stack-sm">
         ${resolvedWeekPlan.map((day) => renderWeekPlanDay(day)).join("")}
       </div>
@@ -277,7 +291,7 @@ function renderProgress(resolvedWeekPlan) {
   const mobilityScore = getMobilityScore();
   const streak = getCurrentStreak(resolvedWeekPlan);
   const weekStats = getWeekStats(resolvedWeekPlan);
-  const completedTrainingCount = getCompletedTrainingCount();
+  const completedTrainingCount = getCompletedTrainingCount(resolvedWeekPlan);
   const chartValues = [
     { label: "Done", value: weekStats.completed, tone: "accent" },
     { label: "Open", value: weekStats.open, tone: "muted" },
@@ -289,8 +303,10 @@ function renderProgress(resolvedWeekPlan) {
     <section class="stack-lg">
       <div class="section-heading">
         <h2>Fortschritt</h2>
-        <p>Alle wichtigen Signale auf einen Blick: Training, Routine und Beweglichkeit.</p>
+        <p>Alle wichtigen Signale fuer Woche ${state.activeWeek}: Training, Routine und Beweglichkeit.</p>
       </div>
+
+      ${renderWeekSwitcher()}
 
       <section class="stat-grid">
         ${renderStatCard("Erledigte Trainings", `${completedTrainingCount}`)}
@@ -394,7 +410,7 @@ function renderMobilityRow(area) {
 }
 
 function renderTrainingModal(sessionId) {
-  const session = weekPlan.find((entry) => entry.id === sessionId);
+  const session = getCurrentWeekPlan().find((entry) => entry.id === sessionId);
   const training = session ? getTrainingById(session.trainingId) : null;
 
   if (!session || !training) {
@@ -410,6 +426,7 @@ function renderTrainingModal(sessionId) {
   modalTitleElement.textContent = training.title;
   modalContentElement.innerHTML = `
     <div class="stack-lg">
+      <p class="body-copy">Woche ${session.week} - ${session.fullLabel}</p>
       <div class="meta-grid">
         <div>
           <span class="meta-label">Fokus</span>
@@ -478,6 +495,27 @@ function renderStatusPill(status) {
   return `<span class="status-pill status-pill-${status}">${labels[status]}</span>`;
 }
 
+function renderWeekSwitcher() {
+  return `
+    <div class="week-switcher" aria-label="Wochenwahl">
+      ${availableWeeks
+        .map(
+          (week) => `
+            <button
+              class="week-chip ${week === state.activeWeek ? "week-chip-active" : ""}"
+              data-action="set-week"
+              data-week="${week}"
+              type="button"
+            >
+              Woche ${week}
+            </button>
+          `,
+        )
+        .join("")}
+    </div>
+  `;
+}
+
 function renderStatCard(label, value, dark = false) {
   return `
     <article class="stat-card ${dark ? "stat-card-dark" : ""}">
@@ -522,7 +560,11 @@ function getTrainingCompletion(training, completedExerciseIds) {
   return completedExerciseIds.length / training.exercises.length;
 }
 
-function getCompletedSessionIds() {
+function getCurrentWeekPlan() {
+  return weekPlansByWeek.find((plan) => plan[0]?.week === state.activeWeek) ?? weekPlansByWeek[0];
+}
+
+function getCompletedSessionIds(weekPlan) {
   return weekPlan
     .filter((day) => {
       if (!day.trainingId || day.status === "pause") {
@@ -543,7 +585,7 @@ function getCompletedSessionIds() {
     .map((day) => day.id);
 }
 
-function getResolvedWeekPlan(completedSessionIds) {
+function getResolvedWeekPlan(weekPlan, completedSessionIds) {
   return weekPlan.map((day) => {
     const derivedStatus =
       day.status === "pause"
@@ -598,8 +640,8 @@ function getWeekStats(resolvedWeekPlan) {
   };
 }
 
-function getCompletedTrainingCount() {
-  return getCompletedSessionIds().length;
+function getCompletedTrainingCount(resolvedWeekPlan) {
+  return resolvedWeekPlan.filter((day) => day.status === "done").length;
 }
 
 function toggleExerciseCompleted(sessionId, exerciseId) {
@@ -643,6 +685,7 @@ function loadState() {
       ...state.mobilityRatings,
       ...savedState.mobilityRatings,
     };
+    state.activeWeek = savedState.activeWeek ?? state.activeWeek;
     state.completedExerciseIdsBySessionId = {
       ...state.completedExerciseIdsBySessionId,
       ...savedState.completedExerciseIdsBySessionId,
@@ -654,6 +697,7 @@ function loadState() {
 
 function saveState() {
   const payload = {
+    activeWeek: state.activeWeek,
     mobilityRatings: state.mobilityRatings,
     completedExerciseIdsBySessionId: state.completedExerciseIdsBySessionId,
   };
