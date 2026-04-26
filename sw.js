@@ -1,4 +1,4 @@
-const CACHE_NAME = "moveback-static-v1";
+const CACHE_NAME = "moveback-static-v2";
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -10,6 +10,7 @@ const CORE_ASSETS = [
 ];
 
 self.addEventListener("install", (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(CORE_ASSETS)),
   );
@@ -25,6 +26,7 @@ self.addEventListener("activate", (event) => {
       ),
     ),
   );
+  self.clients.claim();
 });
 
 self.addEventListener("fetch", (event) => {
