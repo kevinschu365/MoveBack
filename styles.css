@@ -539,6 +539,10 @@ button {
   background: rgba(7, 26, 45, 0.48);
 }
 
+.modal-backdrop[hidden] {
+  display: none;
+}
+
 .modal-panel {
   max-width: 460px;
   width: 100%;
