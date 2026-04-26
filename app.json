@@ -1,0 +1,13 @@
+{
+  "expo": {
+    "name": "MoveBack",
+    "slug": "moveback",
+    "scheme": "moveback",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "plugins": ["expo-router"],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
